@@ -53,10 +53,12 @@ class REST::AccountSerializer < ActiveModel::Serializer
   end
 
   def header
+    return object.header_remote_url unless object.header_remote_url.blank?
     full_asset_url(object.suspended? ? object.header.default_url : object.header_original_url)
   end
 
   def header_static
+    return object.header_remote_url unless object.header_remote_url.blank?
     full_asset_url(object.suspended? ? object.header.default_url : object.header_static_url)
   end
 
