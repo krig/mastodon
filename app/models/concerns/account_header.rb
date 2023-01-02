@@ -30,6 +30,6 @@ module AccountHeader
   end
 
   def header_static_url
-    header_original_url
+    header_content_type == 'image/gif' ? header.url(:static) : header_original_url
   end
 end
