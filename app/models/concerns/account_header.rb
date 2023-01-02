@@ -32,4 +32,12 @@ module AccountHeader
   def header_static_url
     header_content_type == 'image/gif' ? header.url(:static) : header_original_url
   end
+
+  def header_remote_url_first
+    if header_remote_url.blank?
+      header.url
+    else
+      header_remote_url
+    end
+  end
 end
