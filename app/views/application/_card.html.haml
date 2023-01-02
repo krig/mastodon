@@ -3,7 +3,7 @@
 .card.h-card
   = link_to account_url, target: '_blank', rel: 'noopener noreferrer' do
     .card__img
-      = image_tag account.header_remote_url_first, alt: ''
+      = image_tag account.header.url, alt: ''
     .card__bar
       .avatar
         = image_tag account.avatar.url, alt: '', width: 48, height: 48, class: 'u-photo'
