@@ -1,0 +1,4 @@
+#!/bin/sh
+HEADERS=/home/mastodon/live/public/system/cache/accounts/headers
+[ -d "$HEADERS" ] && find "$HEADERS" -mtime +4 -type f -delete
+
