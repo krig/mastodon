@@ -51,19 +51,17 @@ import {
   Directory,
   Explore,
   FollowRecommendations,
-  About,
   PrivacyPolicy,
 } from './util/async-components';
-import initialState, { me, owner, singleUserMode, showTrends } from '../../initial_state';
+import initialState, { me, owner, singleUserMode, showTrends, trendsAsLanding } from '../../initial_state';
 import { closeOnboarding, INTRODUCTION_VERSION } from 'mastodon/actions/onboarding';
-import Header from './components/header';
 
 // Dummy import, to make sure that <Status /> ends up in the application bundle.
 // Without this it ends up in ~8 very commonly used bundles.
 import '../../components/status';
 
 const messages = defineMessages({
-  beforeUnload: { id: 'ui.beforeunload', defaultMessage: 'Your draft will be lost if you leave Mastodon.' },
+  beforeUnload: { id: 'ui.beforeunload', defaultMessage: 'Your draft will be lost if you leave.' },
 });
 
 const mapStateToProps = state => ({
@@ -163,8 +161,12 @@ class SwitchingColumnsArea extends React.PureComponent {
       }
     } else if (singleUserMode && owner && initialState?.accounts[owner]) {
       redirect = <Redirect from='/' to={`/@${initialState.accounts[owner].username}`} exact />;
-    } else if (showTrends) {
+    } else if (showTrends && trendsAsLanding) {
       redirect = <Redirect from='/' to='/explore' exact />;
+      // Hometown: if signed-out landing page is the about page, don't render the app shell, just redirect
+    } else if (window.location.pathname === '/' || window.location.pathname === '') {
+      window.location = '/about';
+      return null;
     } else {
       redirect = <Redirect from='/' to='/about' exact />;
     }
@@ -176,7 +178,6 @@ class SwitchingColumnsArea extends React.PureComponent {
 
           <WrappedRoute path='/getting-started' component={GettingStarted} content={children} />
           <WrappedRoute path='/keyboard-shortcuts' component={KeyboardShortcuts} content={children} />
-          <WrappedRoute path='/about' component={About} content={children} />
           <WrappedRoute path='/privacy-policy' component={PrivacyPolicy} content={children} />
 
           <WrappedRoute path={['/home', '/timelines/home']} component={HomeTimeline} content={children} />
@@ -568,8 +569,6 @@ class UI extends React.PureComponent {
     return (
       <HotKeys keyMap={keyMap} handlers={handlers} ref={this.setHotkeysRef} attach={window} focused>
         <div className={classNames('ui', { 'is-composing': isComposing })} ref={this.setRef} style={{ pointerEvents: dropdownMenuIsOpen ? 'none' : null }}>
-          <Header />
-
           <SwitchingColumnsArea location={location} mobile={layout === 'mobile' || layout === 'single-column'}>
             {children}
           </SwitchingColumnsArea>

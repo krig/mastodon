@@ -2,11 +2,16 @@ import React from 'react';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import Permalink from './permalink';
 import classnames from 'classnames';
 import PollContainer from 'mastodon/containers/poll_container';
 import Icon from 'mastodon/components/icon';
-import { autoPlayGif, languages as preloadedLanguages, translationEnabled } from 'mastodon/initial_state';
+import {
+  autoPlayGif,
+  languages as preloadedLanguages,
+  translationEnabled,
+  expandUsernames,
+} from 'mastodon/initial_state';
 
 const MAX_HEIGHT = 706; // 22px * 32 (+ 2px padding at the top)
 
@@ -96,10 +101,16 @@ class StatusContent extends React.PureComponent {
       if (mention) {
         link.addEventListener('click', this.onMentionClick.bind(this, mention), false);
         link.setAttribute('title', mention.get('acct'));
-        link.setAttribute('href', `/@${mention.get('acct')}`);
+        // Hometown: make remote usernames
+        if (expandUsernames) {
+          if (mention.get('acct') === mention.get('username')) {
+            link.innerHTML = `@<span class="hometown-mention-local">${mention.get('username')}</span>`;
+          } else {
+            link.innerHTML = `@<span class="hometown-mention-remote">${mention.get('acct')}</span>`;
+          }
+        }
       } else if (link.textContent[0] === '#' || (link.previousSibling && link.previousSibling.textContent && link.previousSibling.textContent[link.previousSibling.textContent.length - 1] === '#')) {
         link.addEventListener('click', this.onHashtagClick.bind(this, link.text), false);
-        link.setAttribute('href', `/tags/${link.text.slice(1)}`);
       } else {
         link.setAttribute('title', link.href);
         link.classList.add('unhandled-link');
@@ -237,6 +248,12 @@ class StatusContent extends React.PureComponent {
       </button>
     );
 
+    const readArticleButton = (
+      <button className='status__content__read-more-button' onClick={this.props.onClick} key='read-more'>
+        <FormattedMessage id='status.read_article' defaultMessage='Read article' /><Icon id='angle-right' fixedWidth />
+      </button>
+    );
+
     const translateButton = renderTranslate && (
       <TranslateButton onClick={this.handleTranslate} translation={status.get('translation')} />
     );
@@ -249,9 +266,11 @@ class StatusContent extends React.PureComponent {
       let mentionsPlaceholder = '';
 
       const mentionLinks = status.get('mentions').map(item => (
-        <Link to={`/@${item.get('acct')}`} key={item.get('id')} className='status-link mention'>
-          @<span>{item.get('username')}</span>
-        </Link>
+        <Permalink to={`/@${item.get('acct')}`} href={item.get('url')} key={item.get('id')} className='status-link mention'>
+          @<span className={item.get('acct') === item.get('username') ? 'fc_mention_local' : 'fc_mention_remote'}>
+            {expandUsernames ? item.get('acct') : item.get('username')}
+          </span>
+        </Permalink>
       )).reduce((aggregate, item) => [...aggregate, item, ' '], []);
 
       const toggleText = hidden ? <FormattedMessage id='status.show_more' defaultMessage='Show more' /> : <FormattedMessage id='status.show_less' defaultMessage='Show less' />;
@@ -260,22 +279,27 @@ class StatusContent extends React.PureComponent {
         mentionsPlaceholder = <div>{mentionLinks}</div>;
       }
 
-      return (
+      const output = [
         <div className={classNames} ref={this.setRef} tabIndex='0' onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
           <p style={{ marginBottom: hidden && status.get('mentions').isEmpty() ? '0px' : null }}>
             <span dangerouslySetInnerHTML={spoilerContent} className='translate' lang={lang} />
             {' '}
-            <button type='button' className={`status__content__spoiler-link ${hidden ? 'status__content__spoiler-link--show-more' : 'status__content__spoiler-link--show-less'}`} onClick={this.handleSpoilerClick} aria-expanded={!hidden}>{toggleText}</button>
+            {status.get('activity_pub_type') === 'Article' ? '' : <button type='button' className={`status__content__spoiler-link ${hidden ? 'status__content__spoiler-link--show-more' : 'status__content__spoiler-link--show-less'}`} onClick={this.handleSpoilerClick} aria-expanded={!hidden}>{toggleText}</button>}
           </p>
 
           {mentionsPlaceholder}
 
-          <div tabIndex={!hidden ? 0 : null} className={`status__content__text ${!hidden ? 'status__content__text--visible' : ''} translate`} lang={lang} dangerouslySetInnerHTML={content} />
-
+          <div tabIndex={!hidden ? 0 : null} className={`status__content__text ${!hidden ? 'status__content__text--visible' : ''} ${status.get('activity_pub_type') === 'Article' ? 'article-type' : ''} translate`} lang={lang} dangerouslySetInnerHTML={content} />
           {!hidden && poll}
           {!hidden && translateButton}
-        </div>
-      );
+        </div>,
+      ];
+
+      if (status.get('activity_pub_type') === 'Article' && !this.props.expanded) {
+        output.push(readArticleButton);
+      }
+
+      return output;
     } else if (this.props.onClick) {
       return (
         <>

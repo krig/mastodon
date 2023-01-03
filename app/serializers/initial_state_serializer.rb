@@ -5,10 +5,14 @@ class InitialStateSerializer < ActiveModel::Serializer
 
   attributes :meta, :compose, :accounts,
              :media_attachments, :settings,
-             :languages
+             :max_toot_chars, :languages
 
   has_one :push_subscription, serializer: REST::WebPushSubscriptionSerializer
   has_one :role, serializer: REST::RoleSerializer
+
+  def max_toot_chars
+    StatusLengthValidator::MAX_CHARS
+  end
 
   # rubocop:disable Metrics/AbcSize
   def meta
@@ -32,6 +36,7 @@ class InitialStateSerializer < ActiveModel::Serializer
       activity_api_enabled: Setting.activity_api_enabled,
       single_user_mode: Rails.configuration.x.single_user_mode,
       translation_enabled: TranslationService.configured?,
+      trends_as_landing_page: Setting.trends_as_landing_page,
     }
 
     if object.current_account
@@ -40,6 +45,7 @@ class InitialStateSerializer < ActiveModel::Serializer
       store[:boost_modal]       = object.current_account.user.setting_boost_modal
       store[:delete_modal]      = object.current_account.user.setting_delete_modal
       store[:auto_play_gif]     = object.current_account.user.setting_auto_play_gif
+      store[:expand_usernames]  = object.current_account.user.setting_expand_usernames
       store[:display_media]     = object.current_account.user.setting_display_media
       store[:expand_spoilers]   = object.current_account.user.setting_expand_spoilers
       store[:reduce_motion]     = object.current_account.user.setting_reduce_motion
@@ -72,10 +78,11 @@ class InitialStateSerializer < ActiveModel::Serializer
     store = {}
 
     if object.current_account
-      store[:me]                = object.current_account.id.to_s
-      store[:default_privacy]   = object.visibility || object.current_account.user.setting_default_privacy
-      store[:default_sensitive] = object.current_account.user.setting_default_sensitive
-      store[:default_language]  = object.current_account.user.preferred_posting_language
+      store[:me]                 = object.current_account.id.to_s
+      store[:default_privacy]    = object.visibility || object.current_account.user.setting_default_privacy
+      store[:default_sensitive]  = object.current_account.user.setting_default_sensitive
+      store[:default_federation] = object.current_account.user.setting_default_federation
+      store[:default_language]   = object.current_account.user.preferred_posting_language
     end
 
     store[:text] = object.text if object.text

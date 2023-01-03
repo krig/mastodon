@@ -23,10 +23,13 @@ class Form::AdminSettings
     thumbnail
     mascot
     trends
+    trends_as_landing_page
     trendable_by_default
     show_domain_blocks
     show_domain_blocks_rationale
     noindex
+    norss
+    default_federation
     require_invite_text
     media_cache_retention_period
     content_cache_retention_period
@@ -46,8 +49,11 @@ class Form::AdminSettings
     preview_sensitive_media
     profile_directory
     trends
+    trends_as_landing_page
     trendable_by_default
     noindex
+    norss
+    default_federation
     require_invite_text
   ).freeze
 

@@ -10,7 +10,7 @@ class REST::InstanceSerializer < ActiveModel::Serializer
   include RoutingHelper
 
   attributes :domain, :title, :version, :source_url, :description,
-             :usage, :thumbnail, :languages, :configuration,
+             :usage, :thumbnail, :max_toot_chars, :languages, :configuration,
              :registrations
 
   has_one :contact, serializer: ContactSerializer
@@ -31,6 +31,10 @@ class REST::InstanceSerializer < ActiveModel::Serializer
         url: full_pack_url('media/images/preview.png'),
       }
     end
+  end
+
+  def max_toot_chars
+    StatusLengthValidator::MAX_CHARS
   end
 
   def usage

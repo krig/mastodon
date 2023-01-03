@@ -1,6 +1,7 @@
 import React from 'react';
 import ComposeFormContainer from './containers/compose_form_container';
 import NavigationContainer from './containers/navigation_container';
+import ColumnHeader from 'mastodon/components/column_header';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
@@ -136,6 +137,12 @@ class Compose extends React.PureComponent {
 
     return (
       <Column onFocus={this.onFocus}>
+        <ColumnHeader
+          icon='pencil'
+          title={intl.formatMessage(messages.compose)}
+          onClick={this.handleHeaderClick}
+          multiColumn={multiColumn}
+        />
         <NavigationContainer onClose={this.onBlur} />
         <ComposeFormContainer />
 

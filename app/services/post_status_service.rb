@@ -91,11 +91,32 @@ class PostStatusService < BaseService
     end
   end
 
+  def local_only_option(local_only, in_reply_to, federation_setting, text, spoiler_text)
+    # This is intended for third party clients. The admin can set a custom :local_only:
+    # emoji that users can append to force a post to be local only.
+    if text.include?(':local_only:') ||
+       spoiler_text&.include?(':local_only')
+      return true
+    end
+    if local_only.nil?
+      if in_reply_to && in_reply_to.local_only
+        return true
+      end
+      if in_reply_to && !in_reply_to.local_only
+        return false
+      end
+      return !federation_setting
+    end
+    local_only
+  end
+
   def postprocess_status!
     Trends.tags.register(@status)
     LinkCrawlWorker.perform_async(@status.id)
     DistributionWorker.perform_async(@status.id)
-    ActivityPub::DistributionWorker.perform_async(@status.id)
+    unless @status.local_only?
+      ActivityPub::DistributionWorker.perform_async(@status.id)
+    end
     PollExpirationNotifyWorker.perform_at(@status.poll.expires_at, @status.poll.id) if @status.poll
   end
 
@@ -169,6 +190,7 @@ class PostStatusService < BaseService
       language: valid_locale_cascade(@options[:language], @account.user&.preferred_posting_language, I18n.default_locale),
       application: @options[:application],
       rate_limit: @options[:with_rate_limit],
+      local_only: local_only_option(@options[:local_only], @in_reply_to, @account.user&.setting_default_federation, @text, @options[:spoiler_text]),
     }.compact
   end
 

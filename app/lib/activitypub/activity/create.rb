@@ -76,6 +76,7 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
     @silenced_account_ids = []
     @params               = {}
 
+    process_inline_images if @object['content'].present? && @object['type'] == 'Article'
     process_status_params
     process_tags
     process_audience
@@ -113,9 +114,9 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
         uri: @status_parser.uri,
         url: @status_parser.url || @status_parser.uri,
         account: @account,
-        text: converted_object_type? ? converted_text : (@status_parser.text || ''),
+        text: text_from_content || '',
         language: @status_parser.language,
-        spoiler_text: converted_object_type? ? '' : (@status_parser.spoiler_text || ''),
+        spoiler_text: converted_object_type? ? '' : (@status_parser.spoiler_text || (@object['type'] == 'Article' && text_from_name) || ''),
         created_at: @status_parser.created_at,
         edited_at: @status_parser.edited_at && @status_parser.edited_at != @status_parser.created_at ? @status_parser.edited_at : nil,
         override_timestamps: @options[:override_timestamps],
@@ -126,7 +127,67 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
         conversation: conversation_from_uri(@object['conversation']),
         media_attachment_ids: process_attachments.take(4).map(&:id),
         poll: process_poll,
+        activity_pub_type: @object['type']
       }
+    end
+  end
+
+  class Handler < ::Ox::Sax
+    attr_reader :srcs
+    attr_reader :alts
+    def initialize(block)
+      @stack = []
+      @srcs = []
+      @alts = {}
+    end
+
+    def start_element(element_name)
+      @stack << [element_name, {}]
+    end
+
+    def end_element(element_name)
+      self_name, self_attributes = @stack[-1]
+      if self_name == :img && !self_attributes[:src].nil?
+        @srcs << self_attributes[:src]
+        @alts[self_attributes[:src]] = self_attributes[:alt]
+      end
+      @stack.pop
+    end
+
+    def attr(attribute_name, attribute_value)
+      _name, attributes = @stack.last
+      attributes[attribute_name] = attribute_value
+    end
+  end
+
+  def process_inline_images
+    proc = Proc.new { |name| puts name }
+    handler = Handler.new(proc)
+    Ox.sax_parse(handler, @object['content'])
+    handler.srcs.each do |src|
+      # Handle images where the src is formatted as "/foo/bar.png"
+      # we assume that the `url` field is populated which lets us infer
+      # the protocol and domain of the _original_ article, as though
+      # we were looking at it via a web browser
+      if src[0] == '/' && !@object['url'].nil?
+        site = Addressable::URI.parse(@object['url']).site
+        src = site + src
+      end
+
+      if skip_download?
+        @object['content'].gsub!(src, '')
+        next
+      end
+
+      media_attachment = MediaAttachment.create(account: @account, remote_url: src, description: handler.alts[src], focus: nil)
+      media_attachment.download_file!
+      media_attachment.save
+      if unsupported_media_type?(media_attachment.file.content_type)
+        @object['content'].gsub!(src, '')
+        media_attachment.delete
+      else
+        @object['content'].gsub!(src, media_attachment.file.url(:small))
+      end
     end
   end
 
@@ -368,12 +429,36 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
     value_or_id(@object['inReplyTo'])
   end
 
+  def text_from_content
+    return converted_text if converted_object_type?
+
+    return article_format(@object['content']) if @object['content'].present? && @object['type'] == 'Article'
+
+    return @status_parser.text || ''
+  end
+
+  def text_from_name
+    if @object['name'].present?
+      @object['name']
+    elsif name_language_map?
+      @object['nameMap'].values.first
+    end
+  end
+
+  def name_language_map?
+    @object['nameMap'].is_a?(Hash) && !@object['nameMap'].empty?
+  end
+
   def converted_text
     linkify([@status_parser.title.presence, @status_parser.spoiler_text.presence, @status_parser.url || @status_parser.uri].compact.join("\n\n"))
   end
 
   def unsupported_media_type?(mime_type)
     mime_type.present? && !MediaAttachment.supported_mime_types.include?(mime_type)
+  end
+
+  def blurhash_valid_chars?(blurhash)
+    /^[\w#$%*+-.:;=?@\[\]^{|}~]+$/.match?(blurhash)
   end
 
   def skip_download?

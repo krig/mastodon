@@ -36,6 +36,7 @@ class Settings::PreferencesController < Settings::BaseController
       :setting_default_privacy,
       :setting_default_sensitive,
       :setting_default_language,
+      :setting_default_federation,
       :setting_unfollow_modal,
       :setting_boost_modal,
       :setting_delete_modal,
@@ -46,6 +47,7 @@ class Settings::PreferencesController < Settings::BaseController
       :setting_disable_swiping,
       :setting_system_font_ui,
       :setting_noindex,
+      :setting_norss,
       :setting_theme,
       :setting_aggregate_reblogs,
       :setting_show_application,
@@ -55,6 +57,7 @@ class Settings::PreferencesController < Settings::BaseController
       :setting_trends,
       :setting_crop_images,
       :setting_always_send_emails,
+      :setting_expand_usernames,
       notification_emails: %i(follow follow_request reblog favourite mention report pending_account trending_tag appeal),
       interactions: %i(must_be_follower must_be_following must_be_following_dm)
     )

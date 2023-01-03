@@ -41,6 +41,5 @@
   %body{ class: body_classes }
     = content_for?(:content) ? yield(:content) : yield
 
-    .logo-resources{ 'tabindex' => '-1', 'inert' => true, 'aria-hidden' => true }
-      = render_symbol :icon
-      = render_symbol :wordmark
+    .logo-resources
+      = raw render file: Rails.root.join('app', 'javascript', 'images', 'hometown.svg')

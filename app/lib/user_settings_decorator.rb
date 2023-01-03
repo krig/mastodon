@@ -20,16 +20,19 @@ class UserSettingsDecorator
     user.settings['default_privacy']     = default_privacy_preference if change?('setting_default_privacy')
     user.settings['default_sensitive']   = default_sensitive_preference if change?('setting_default_sensitive')
     user.settings['default_language']    = default_language_preference if change?('setting_default_language')
+    user.settings['default_federation']  = default_federation_preference if change?('setting_default_federation')
     user.settings['unfollow_modal']      = unfollow_modal_preference if change?('setting_unfollow_modal')
     user.settings['boost_modal']         = boost_modal_preference if change?('setting_boost_modal')
     user.settings['delete_modal']        = delete_modal_preference if change?('setting_delete_modal')
     user.settings['auto_play_gif']       = auto_play_gif_preference if change?('setting_auto_play_gif')
+    user.settings['expand_usernames']    = expand_usernames_preference if change?('setting_expand_usernames')
     user.settings['display_media']       = display_media_preference if change?('setting_display_media')
     user.settings['expand_spoilers']     = expand_spoilers_preference if change?('setting_expand_spoilers')
     user.settings['reduce_motion']       = reduce_motion_preference if change?('setting_reduce_motion')
     user.settings['disable_swiping']     = disable_swiping_preference if change?('setting_disable_swiping')
     user.settings['system_font_ui']      = system_font_ui_preference if change?('setting_system_font_ui')
     user.settings['noindex']             = noindex_preference if change?('setting_noindex')
+    user.settings['norss']               = norss_preference if change?('setting_norss')
     user.settings['theme']               = theme_preference if change?('setting_theme')
     user.settings['aggregate_reblogs']   = aggregate_reblogs_preference if change?('setting_aggregate_reblogs')
     user.settings['show_application']    = show_application_preference if change?('setting_show_application')
@@ -57,6 +60,10 @@ class UserSettingsDecorator
     boolean_cast_setting 'setting_default_sensitive'
   end
 
+  def default_federation_preference
+    boolean_cast_setting 'setting_default_federation'
+  end
+
   def unfollow_modal_preference
     boolean_cast_setting 'setting_unfollow_modal'
   end
@@ -77,6 +84,10 @@ class UserSettingsDecorator
     boolean_cast_setting 'setting_auto_play_gif'
   end
 
+  def expand_usernames_preference
+    boolean_cast_setting 'setting_expand_usernames'
+  end
+
   def display_media_preference
     settings['setting_display_media']
   end
@@ -95,6 +106,10 @@ class UserSettingsDecorator
 
   def noindex_preference
     boolean_cast_setting 'setting_noindex'
+  end
+
+  def norss_preference
+    boolean_cast_setting 'setting_norss'
   end
 
   def show_application_preference

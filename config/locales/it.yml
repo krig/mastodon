@@ -1,7 +1,7 @@
 ---
 it:
   about:
-    about_mastodon_html: 'Il social network del futuro: niente pubblicità, niente controllo da parte di qualche azienda privata, design etico e decentralizzazione! Con Mastodon il proprietario dei tuoi dati sei tu!'
+    about_mastodon_html: 'Hometown è adattato da Mastodon, un social network decentralizzato senza pubblicità, senza controllo da parte di qualche azienda privata e design etico.'
     contact_missing: Non impostato
     contact_unavailable: N/D
     hosted_on: Mastodon ospitato su %{domain}
@@ -921,9 +921,9 @@ it:
     delete_account: Elimina account
     delete_account_html: Se desideri cancellare il tuo account, puoi <a href="%{path}">farlo qui</a>. Ti sarà chiesta conferma.
     description:
-      prefix_invited_by_user: "@%{name} ti invita a iscriverti a questo server Mastodon!"
-      prefix_sign_up: Iscriviti oggi a Mastodon!
-      suffix: Con un account, sarai in grado di seguire le persone, pubblicare aggiornamenti e scambiare messaggi con gli utenti da qualsiasi server di Mastodon e altro ancora!
+      prefix_invited_by_user: "@%{name} ti invita a iscriverti a questo server Hometown!"
+      prefix_sign_up: Iscriviti oggi a Hometown!
+      suffix: Con un account, sarai in grado di seguire le persone, pubblicare aggiornamenti e scambiare messaggi con gli utenti da qualsiasi server di Hometown e altro ancora!
     didnt_get_confirmation: Non hai ricevuto le istruzioni di conferma?
     dont_have_your_security_key: Non hai la tua chiave di sicurezza?
     forgot_password: Hai dimenticato la tua password?
@@ -932,7 +932,7 @@ it:
     link_to_webauth: Usa il tuo dispositivo chiave di sicurezza
     log_in_with: Accedi con
     login: Entra
-    logout: Esci da Mastodon
+    logout: Esci
     migrate_account: Sposta ad un account differente
     migrate_account_html: Se vuoi che questo account sia reindirizzato a uno diverso, puoi <a href="%{path}">configurarlo qui</a>.
     or_log_in_with: Oppure accedi con
@@ -1067,7 +1067,7 @@ it:
       content: Siamo spiacenti, ma qualcosa non ha funzionato dal nostro lato.
       title: Questa pagina non è corretta
     '503': La pagina non può essere trasmessa a causa di un errore temporaneo del server.
-    noscript_html: Per usare l'interfaccia web di Mastodon dovi abilitare JavaScript. In alternativa puoi provare una delle <a href="%{apps_path}">app native</a> per Mastodon per la tua piattaforma.
+    noscript_html: Per usare l'interfaccia web di %{title} dovi abilitare JavaScript. In alternativa puoi provare una delle <a href="%{apps_path}">app native</a> per Hometown/Mastodon per la tua piattaforma.
   existing_username_validator:
     not_found: impossibile trovare un utente locale con quel nome utente
     not_found_multiple: impossibile trovare %{usernames}
@@ -1393,7 +1393,7 @@ it:
       weibo: Weibo
     current_session: Sessione corrente
     description: "%{browser} su %{platform}"
-    explanation: Questi sono i browser da cui attualmente è avvenuto l'accesso al tuo account Mastodon.
+    explanation: Questi sono i browser da cui attualmente è avvenuto l'accesso al tuo account %{title}.
     ip: IP
     platforms:
       adobe_air: Adobe Air
@@ -1418,7 +1418,7 @@ it:
     aliases: Alias dell'account
     appearance: Interfaccia
     authorized_apps: Applicazioni autorizzate
-    back: Torna a Mastodon
+    back: Torna a casa
     delete: Cancellazione account
     development: Sviluppo
     edit_profile: Modifica profilo
@@ -1533,6 +1533,8 @@ it:
     contrast: Mastodon (contrasto elevato)
     default: Mastodon (scuro)
     mastodon-light: Mastodon (chiaro)
+    macaron: Macaron (chiaro pastello)
+    fairy-floss: Fairy Floss (scuro pastello)
   time:
     formats:
       default: "%d %b %Y, %H:%M"
@@ -1564,7 +1566,7 @@ it:
       subject: Il tuo appello del %{date} è stato respinto
       title: Appello respinto
     backup_ready:
-      explanation: Hai richiesto un backup completo del tuo account Mastodon. È pronto per essere scaricato!
+      explanation: Hai richiesto un backup completo del tuo account %{title}. È pronto per essere scaricato!
       subject: Il tuo archivio è pronto per essere scaricato
       title: Esportazione archivio
     suspicious_sign_in:
@@ -1613,7 +1615,7 @@ it:
       final_step: 'Inizia a pubblicare! Anche senza seguaci, i tuoi post pubblici possono essere visti da altri, ad esempio sulla timeline locale o negli hashtag. Potresti presentarti con l''hashtag #presentazione.'
       full_handle: Il tuo nome utente completo
       full_handle_hint: Questo è ciò che diresti ai tuoi amici in modo che possano seguirti o contattarti da un altro server.
-      subject: Benvenuto/a su Mastodon
+      subject: Benvenuto/a su %{title}
       title: Benvenuto a bordo, %{name}!
   users:
     follow_limit_reached: Non puoi seguire più di %{limit} persone
@@ -1622,7 +1624,7 @@ it:
     seamless_external_login: Hai effettuato l'accesso tramite un servizio esterno, quindi le impostazioni di password e e-mail non sono disponibili.
     signed_in_as: 'Hai effettuato l''accesso come:'
   verification:
-    explanation_html: 'Puoi <strong>certificare te stesso come proprietario dei link nei metadati del tuo profilo</strong>. Per farlo, il sito a cui punta il link deve contenere un link che punta al tuo profilo Mastodon. Il link di ritorno <strong>deve</strong> avere l''attributo <code>rel="me"</code>. Il testo del link non ha importanza. Ecco un esempio:'
+    explanation_html: 'Puoi <strong>certificare te stesso come proprietario dei link nei metadati del tuo profilo</strong>. Per farlo, il sito a cui punta il link deve contenere un link che punta al tuo profilo %{instance}. Il link di ritorno <strong>deve</strong> avere l''attributo <code>rel="me"</code>. Il testo del link non ha importanza. Ecco un esempio:'
     verification: Verifica
   webauthn_credentials:
     add: Aggiungi una nuova chiave di sicurezza

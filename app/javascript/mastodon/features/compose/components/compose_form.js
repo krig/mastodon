@@ -11,6 +11,7 @@ import UploadButtonContainer from '../containers/upload_button_container';
 import { defineMessages, injectIntl } from 'react-intl';
 import SpoilerButtonContainer from '../containers/spoiler_button_container';
 import PrivacyDropdownContainer from '../containers/privacy_dropdown_container';
+import FederationDropdownContainer from '../containers/federation_dropdown_container';
 import EmojiPickerDropdown from '../containers/emoji_picker_dropdown_container';
 import PollFormContainer from '../containers/poll_form_container';
 import UploadFormContainer from '../containers/upload_form_container';
@@ -21,13 +22,14 @@ import ImmutablePureComponent from 'react-immutable-pure-component';
 import { length } from 'stringz';
 import { countableText } from '../util/counter';
 import Icon from 'mastodon/components/icon';
+import { maxChars } from '../../../initial_state';
 
 const allowedAroundShortCode = '><\u0085\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\u2028\u2029\u0009\u000a\u000b\u000c\u000d';
 
 const messages = defineMessages({
   placeholder: { id: 'compose_form.placeholder', defaultMessage: 'What is on your mind?' },
   spoiler_placeholder: { id: 'compose_form.spoiler_placeholder', defaultMessage: 'Write your warning here' },
-  publish: { id: 'compose_form.publish', defaultMessage: 'Publish' },
+  publish: { id: 'compose_form.publish', defaultMessage: 'Post' },
   publishLoud: { id: 'compose_form.publish_loud', defaultMessage: '{publish}!' },
   saveChanges: { id: 'compose_form.save_changes', defaultMessage: 'Save changes' },
 });
@@ -45,6 +47,7 @@ class ComposeForm extends ImmutablePureComponent {
     suggestions: ImmutablePropTypes.list,
     spoiler: PropTypes.bool,
     privacy: PropTypes.string,
+    federation: PropTypes.bool,
     spoilerText: PropTypes.string,
     focusDate: PropTypes.instanceOf(Date),
     caretPosition: PropTypes.number,
@@ -61,14 +64,14 @@ class ComposeForm extends ImmutablePureComponent {
     onChangeSpoilerText: PropTypes.func.isRequired,
     onPaste: PropTypes.func.isRequired,
     onPickEmoji: PropTypes.func.isRequired,
-    showSearch: PropTypes.bool,
+    autoFocus: PropTypes.bool,
     anyMedia: PropTypes.bool,
     isInReply: PropTypes.bool,
     singleColumn: PropTypes.bool,
   };
 
   static defaultProps = {
-    showSearch: false,
+    autoFocus: false,
   };
 
   handleChange = (e) => {
@@ -90,7 +93,7 @@ class ComposeForm extends ImmutablePureComponent {
     const fulltext = this.getFulltextForCharacterCounting();
     const isOnlyWhitespace = fulltext.length !== 0 && fulltext.trim().length === 0;
 
-    return !(isSubmitting || isUploading || isChangingUpload || length(fulltext) > 500 || (isOnlyWhitespace && !anyMedia));
+    return !(isSubmitting || isUploading || isChangingUpload || length(fulltext) > maxChars || (isOnlyWhitespace && !anyMedia));
   }
 
   handleSubmit = (e) => {
@@ -154,7 +157,7 @@ class ComposeForm extends ImmutablePureComponent {
     //     - Replying to zero or one users, places the cursor at the end of the textbox.
     //     - Replying to more than one user, selects any usernames past the first;
     //       this provides a convenient shortcut to drop everyone else from the conversation.
-    if (this.props.focusDate !== prevProps.focusDate) {
+    if (this.props.focusDate && this.props.focusDate !== prevProps.focusDate) {
       let selectionEnd, selectionStart;
 
       if (this.props.preselectDate !== prevProps.preselectDate && this.props.isInReply) {
@@ -180,7 +183,7 @@ class ComposeForm extends ImmutablePureComponent {
     } else if (this.props.spoiler !== prevProps.spoiler) {
       if (this.props.spoiler) {
         this.spoilerText.input.focus();
-      } else {
+      } else if (prevProps.spoiler) {
         this.autosuggestTextarea.textarea.focus();
       }
     }
@@ -207,7 +210,7 @@ class ComposeForm extends ImmutablePureComponent {
   }
 
   render () {
-    const { intl, onPaste, showSearch } = this.props;
+    const { intl, onPaste, autoFocus } = this.props;
     const disabled = this.props.isSubmitting;
 
     let publishText = '';
@@ -257,7 +260,7 @@ class ComposeForm extends ImmutablePureComponent {
           onSuggestionsClearRequested={this.onSuggestionsClearRequested}
           onSuggestionSelected={this.onSuggestionSelected}
           onPaste={onPaste}
-          autoFocus={!showSearch && !isMobile(window.innerWidth)}
+          autoFocus={autoFocus}
         >
           <EmojiPickerDropdown onPickEmoji={this.handleEmojiPick} />
 
@@ -273,11 +276,12 @@ class ComposeForm extends ImmutablePureComponent {
             <PollButtonContainer />
             <PrivacyDropdownContainer disabled={this.props.isEditing} />
             <SpoilerButtonContainer />
+            <FederationDropdownContainer disabled={this.props.isEditing} />
             <LanguageDropdown />
           </div>
 
           <div className='character-counter__wrapper'>
-            <CharacterCounter max={500} text={this.getFulltextForCharacterCounting()} />
+            <CharacterCounter max={maxChars} text={this.getFulltextForCharacterCounting()} />
           </div>
         </div>
 
